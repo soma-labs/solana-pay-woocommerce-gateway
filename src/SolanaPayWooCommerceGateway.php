@@ -14,6 +14,15 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
         self::MAINNET_CLUSTER,
     ];
 
+    /**
+     * Our plugin allows users to pay for WooCommerce orders with USD Coin, a token on the Solana blockchain.
+     * We have chosen this token because of it's 1:1 parity with the USD which is one of the fiat currencies
+     * supported by WooCommerce.
+     *
+     * This is the USD Coin token address on the Solana blockchain.
+     * This is neither a public nor a private key and is not related to any user data.
+     * For more information: https://explorer.solana.com/address/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+     */
     private const DEFAULT_SPL_TOKEN = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // USD Coin
 
     private const SOLANA_REFERENCE_META_KEY = 'solana_reference';
@@ -106,22 +115,21 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
         ] );
     }
 
-    /**
-     * @throws JsonException
-     */
     public function thank_you_page( $order_id ): void
     {
         /** @var WC_Order $order */
         $order = wc_get_order( $order_id );
         $solanaPaymentConfig = $this->get_solana_payment_config( $order );
-        $encodedSolanaPaymentConfig = json_encode( $solanaPaymentConfig, JSON_THROW_ON_ERROR );
 
         ob_start();
         include( SP_WC_DIR . '/templates/wc-solana-payment.php' );
         $html = ob_get_clean();
 
-        echo "<script>SOLANA_PAYMENT_CONFIG = $encodedSolanaPaymentConfig;</script>"
-             . apply_filters( 'wc_solana_payment_html', $html, $order, $solanaPaymentConfig );
+        echo "<script>SOLANA_PAYMENT_CONFIG = " . wp_json_encode( $solanaPaymentConfig ) . ";</script>"
+             . wp_kses(
+                 apply_filters( 'wc_solana_payment_html', $html, $order, $solanaPaymentConfig ),
+                 'post'
+             );
     }
 
     public function process_payment( $order_id ): array
@@ -142,6 +150,8 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
      */
     public function check_solana_payment(): void
     {
+        check_ajax_referer( 'check_solana_payment_nonce', 'security' );
+
         $errors = [];
 
         foreach ( [ 'reference', 'recipient', 'amount' ] as $param ) {
@@ -160,18 +170,27 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
             return;
         }
 
+        $reference = sanitize_text_field( $_POST['reference'] );
+        $recipient = sanitize_text_field( $_POST['recipient'] );
+        $splToken = !empty( $_POST['splToken'] ) ? sanitize_text_field( $_POST['splToken'] ) : '';
+        $amount = sanitize_text_field( $_POST['amount'] );
+        $label = sanitize_text_field( $_POST['label'] );
+        $message = sanitize_text_field( $_POST['message'] );
+        $memo = sanitize_text_field( $_POST['memo'] );
+        $cluster = sanitize_text_field( $_POST['cluster'] );
+
         $orderWithReference = get_posts(
             [
                 'post_type'      => 'shop_order',
                 'post_status'    => 'any',
                 'posts_per_page' => 1,
                 'meta_key'       => self::SOLANA_REFERENCE_META_KEY,
-                'meta_value'     => $_POST['reference'],
+                'meta_value'     => $reference,
             ]
         );
 
         if ( empty( $orderWithReference ) ) {
-            wp_send_json( [ 'errors' => [ 'order' => "No order found for reference: {$_POST['reference']}" ] ] );
+            wp_send_json( [ 'errors' => [ 'order' => "No order found for reference: {$reference}" ] ] );
 
             return;
         }
@@ -182,14 +201,14 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
         $response = wp_remote_get(
             add_query_arg(
                 [
-                    'reference' => $_POST['reference'],
-                    'recipient' => $_POST['recipient'],
-                    'splToken'  => ! empty( $_POST['splToken'] ) ? $_POST['splToken'] : '',
-                    'amount'    => $_POST['amount'],
-                    'label'     => $_POST['label'],
-                    'message'   => $_POST['message'],
-                    'memo'      => $_POST['memo'],
-                    'cluster'   => $_POST['cluster'],
+                    'reference' => $reference,
+                    'recipient' => $recipient,
+                    'splToken'  => $splToken,
+                    'amount'    => $amount,
+                    'label'     => $label,
+                    'message'   => $message,
+                    'memo'      => $memo,
+                    'cluster'   => $cluster,
                 ],
                 $this->get_option( 'verification_service_url' )
             )
@@ -233,9 +252,9 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
             ( $solanaReference = get_post_meta( $order->get_id(), self::SOLANA_REFERENCE_META_KEY, true ) )
             && ! empty( $solanaReference )
         ) {
-            $reference = $solanaReference;
+            $reference = esc_attr( $solanaReference );
         } else {
-            $reference = $this->get_solana_payment_reference();
+            $reference = esc_attr( $this->get_solana_payment_reference() );
             update_post_meta( $order->get_id(), self::SOLANA_REFERENCE_META_KEY, $reference );
         }
 

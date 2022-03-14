@@ -24,4 +24,5 @@ export type SolanaPaymentConfigType = {
 export interface SolanaPaymentWindow extends Window {
     SOLANA_PAYMENT_CONFIG: SolanaPaymentConfigType;
     SOLANA_PAYMENT_VERIFIER: SolanaPaymentVerifier;
+    SOLANA_PAY_WC_NONCE_CONFIG: { nonce: string };
 }

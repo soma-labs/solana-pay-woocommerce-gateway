@@ -10,15 +10,17 @@ if ( !defined( 'ABSPATH' ) ) {
  */
 function solana_pay_wc_is_env_ok()
 {
-    if ( version_compare(PHP_VERSION, SP_WC_MIN_PHP_VERSION, '<' ) ) {
+    if ( version_compare( PHP_VERSION, SP_WC_MIN_PHP_VERSION, '<' ) ) {
         add_action( 'admin_notices', 'solana_pay_wc_fail_php_version' );
         return false;
     }
-    elseif ( version_compare(get_bloginfo( 'version' ), SP_WC_MIN_WP_VERSION, '<' ) ) {
+
+    if ( version_compare( get_bloginfo( 'version' ), SP_WC_MIN_WP_VERSION, '<' ) ) {
         add_action( 'admin_notices', 'solana_pay_wc_fail_wp_version' );
         return false;
     }
-    elseif ( !swpp_is_wc_installed() ) {
+
+    if ( !solana_pay_wc_is_wc_installed() ) {
         add_action( 'admin_notices', 'solana_pay_wc_fail_woocommerce' );
         return false;
     }
@@ -80,7 +82,7 @@ function solana_pay_wc_fail_woocommerce()
  * Check to see whether the WooCommerce plugin is installed and activated
  * @return bool
  */
-function swpp_is_wc_installed()
+function solana_pay_wc_is_wc_installed()
 {
     return in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins', [] ) ) );
 }

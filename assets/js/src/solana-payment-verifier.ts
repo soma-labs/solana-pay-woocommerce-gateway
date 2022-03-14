@@ -1,5 +1,7 @@
-import {SolanaPaymentConfigType} from "./types";
+import {SolanaPaymentConfigType, SolanaPaymentWindow} from "./types";
 import SolanaTimeoutTimer from "./solana-timeout-timer";
+
+declare const window: SolanaPaymentWindow;
 
 export default class SolanaPaymentVerifier {
     private config: SolanaPaymentConfigType;
@@ -64,6 +66,8 @@ export default class SolanaPaymentVerifier {
         for (let key in parameters) {
             formData.append(key, parameters[key]);
         }
+
+        formData.append('security', window.SOLANA_PAY_WC_NONCE_CONFIG.nonce);
 
         return fetch(this.config.paymentNotificationEndpoint, {
             method: 'POST',
