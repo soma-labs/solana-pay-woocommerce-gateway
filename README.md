@@ -1,6 +1,17 @@
 # Solana Pay WooCommerce Payment Gateway
+
+✅ Why are we building on Solana?
+We’re building a quick and easy way for merchants who are using ecommerce platforms to integrate with Solana Pay. We believe Solana Pay is the killer app of Solana because of low gas fees and the rapid settling and finalization of transactions. Most people have an a-ha moment the first time they scan a QR code and pay for a real product.
+
+✅ Why we came to the hacker house?
+We came to the hacker house to make connections, seek the best way to fund our project and of course do a live demo. We’ve already made an MVP that works perfectly on mainnet and it can be integrated into WooCommerce in under 1 minute.
+
+✅ What Solpay.store is about?
+The project is exactly what the name says, a quick and easy way to integrate Solana Pay into your online store. We’ve built a plugin that integrates into WooCommerce stores in less than a minute. After, the merchant is ready to accept payments via Solana Pay. Right now it is a WordPress plugin, but we are ready to develop it for all the other ecommerce platforms such as Shopify, BigCommerce, Magento, Salesforce and others.
+We have a live demo running at https://solpay.store/demo and 3 demo videos of how easy it is to install and set up: https://vimeo.com/solpay
+
 Merchant integration of Solana Pay into WooCommerce. For more information: https://docs.solanapay.com/core/merchant-integration.
-Requires separate service for reference generation and transaction validation. Currently using: https://github.com/soma-social/sol-merchant-server setup as a Cloudflare worker.
+Requires separate service for reference generation and transaction validation which is currently set up as a Cloudflare worker.
 
 ### Custom hooks
 * Filter: **apply_filters( 'wc_solana_icon_url', string $url )**
