@@ -9,9 +9,11 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
 {
     private const DEVNET_CLUSTER = 'devnet';
     private const MAINNET_CLUSTER = 'mainnet-beta';
+    private const SOLPAY_STORE_CLUSTER = 'https://solpaystore.genesysgo.net/';
     private const CLUSTERS = [
         self::DEVNET_CLUSTER,
         self::MAINNET_CLUSTER,
+        self::SOLPAY_STORE_CLUSTER,
     ];
 
     /**
@@ -223,7 +225,14 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
         $decodedBody = json_decode( $response['body'], true, 512, JSON_THROW_ON_ERROR );
 
         if ( array_key_exists( 'success', $decodedBody ) && $decodedBody['success'] === true ) {
-            $order->payment_complete();
+            $transactionId = '';
+
+            if ( array_key_exists( 'signature', $decodedBody )
+                 && is_string( $decodedBody['signature'] ) ) {
+                $transactionId = sanitize_text_field( $decodedBody['signature'] );
+            }
+
+            $order->payment_complete( $transactionId );
 
             wp_send_json( [ 'redirectUrl' => $order->get_view_order_url() ] );
 
@@ -265,7 +274,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
         $message        = esc_html( $this->get_solana_transaction_message( $order ) );
         $memo           = esc_html( $this->get_solana_transaction_memo( $order ) );
 
-        $cluster                     = $this->get_option( 'devmode' ) === 'yes' ? self::DEVNET_CLUSTER : self::MAINNET_CLUSTER;
+        $cluster                     = $this->get_option( 'devmode' ) === 'yes' ? self::DEVNET_CLUSTER : self::SOLPAY_STORE_CLUSTER;
         $verificationServiceUrl      = esc_html( $this->get_option( 'verification_service_url' ) );
         $paymentNotificationEndpoint = WC()->api_request_url( $this->id );
 

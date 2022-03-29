@@ -15,13 +15,21 @@ require('@solana/wallet-adapter-react-ui/styles.css');
 declare const window: SolanaPaymentWindow;
 
 const SolanaWalletPayment: FC = (config: SolanaPaymentConfigType) => {
-    const network = config.cluster === WalletAdapterNetwork.Devnet ? WalletAdapterNetwork.Devnet : WalletAdapterNetwork.Mainnet;
-    const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+    let network;
+    let endpoint;
+
+    if (config.cluster === WalletAdapterNetwork.Devnet) {
+        network = WalletAdapterNetwork.Devnet;
+        endpoint = useMemo(() => clusterApiUrl(network), [network]);
+    } else {
+        network = WalletAdapterNetwork.Mainnet;
+        endpoint = config.cluster;
+    }
+
     const wallets = useMemo(
         () => getWalletAdapters({network: network}),
         [network]
     );
-
 
     return (
         <ConnectionProvider endpoint={endpoint}>

@@ -11,7 +11,7 @@ export type SolanaPaymentConfigType = {
         message: string,
         memo: string,
     },
-    cluster: Cluster,
+    cluster: Cluster | string,
     verificationServiceUrl: string,
     verificationServiceInterval: number,
     verificationServiceTimeout: number,
