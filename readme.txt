@@ -1,6 +1,6 @@
 === solpay.store ===
 Contributors: somasocial
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 Requires PHP: 7.4
 Requires at least: 5.7
 Tested up to: 5.9.2
@@ -22,7 +22,7 @@ AUTOMATIC INSTALLATION
 
 VIDEO INSTRUCTIONS
 
-https://vimeo.com/688338327
+https://vimeo.com/692245863
 
 == Frequently Asked Questions ==
 = Why are we building on Solana? =

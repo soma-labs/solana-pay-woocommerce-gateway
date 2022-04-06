@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-17 16:49+0200\n"
+"POT-Creation-Date: 2022-04-06 13:07+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -17,95 +17,96 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: functions.php:50
+#: functions.php:52
 #, php-format
 msgid "Solana Pay WordPress Plugin requires PHP version %s+, plugin is currently NOT RUNNING."
 msgstr ""
 
-#: functions.php:62
+#: functions.php:64
 #, php-format
 msgid "Solana Pay WordPress Plugin requires WordPress version %s+. Because you are using an earlier version, the plugin is currently NOT RUNNING."
 msgstr ""
 
-#: functions.php:74
+#: functions.php:76
 msgid "Solana Pay WordPress Plugin requires WooCommerce plugin to be installed and activated. Because it was not found, the plugin is currently NOT RUNNING."
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:31
-msgid "Solana Payment"
-msgstr ""
-
-#: src/SolanaPayWooCommerceGateway.php:33
+#: src/SolanaPayWooCommerceGateway.php:41
 msgid "Allows payments using SolanaPay SDK using USD Coin as a default SPL token. When in development mode, payments will be made in SOL ($1 = 1SOL)"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:56
+#: src/SolanaPayWooCommerceGateway.php:47
+msgid "Payment will be in USDC"
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:63
 msgid "Enable/Disable"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:58
+#: src/SolanaPayWooCommerceGateway.php:65
 msgid "Enable or disable Solana Payment Gateway"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:62 src/SolanaPayWooCommerceGateway.php:67
-#: src/SolanaPayWooCommerceGateway.php:76
-msgid "Solana Payment Gateway"
-msgstr ""
-
-#: src/SolanaPayWooCommerceGateway.php:65
-msgid "Add a new title for Solana Payment Gateway. This is what users see in the checkout page"
+#: src/SolanaPayWooCommerceGateway.php:69
+msgid "Message to customer"
 msgstr ""
 
 #: src/SolanaPayWooCommerceGateway.php:71
-msgid "Solana Payment Gateway description"
+msgid "This will be added to the the order email"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:74
-msgid "Add a new description for Solana Payment Gateway. This is what users see in the checkout page"
+#: src/SolanaPayWooCommerceGateway.php:73
+msgid "Thanks for paying with solpay!"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:80
-msgid "Instructions"
-msgstr ""
-
+#: src/SolanaPayWooCommerceGateway.php:79
 #: src/SolanaPayWooCommerceGateway.php:83
-msgid "This will be added to the thank you page and the order email."
-msgstr ""
-
-#: src/SolanaPayWooCommerceGateway.php:85
-msgid "Default instructions"
-msgstr ""
-
-#: src/SolanaPayWooCommerceGateway.php:89
-msgid "Enable development mode"
-msgstr ""
-
-#: src/SolanaPayWooCommerceGateway.php:91
-msgid "Transactions will take place on the Solana devnet."
-msgstr ""
-
-#: src/SolanaPayWooCommerceGateway.php:96 src/SolanaPayWooCommerceGateway.php:100
 msgid "Merchant Solana wallet"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:98
-msgid "Merchant Solana wallet. When in development mode use devnet wallet"
+#: src/SolanaPayWooCommerceGateway.php:81
+msgid "Payments will be done by default in USDC - if wallet token accounts are not open receiving tokens from other wallets might not work"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:104
+#: src/SolanaPayWooCommerceGateway.php:86
 msgid "Verification service URL"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:106
-msgid "URL to transaction verification service."
+#: src/SolanaPayWooCommerceGateway.php:88
+msgid "URL of the transaction verification service"
 msgstr ""
 
-#: src/SolanaPayWooCommerceGateway.php:175
+#: src/SolanaPayWooCommerceGateway.php:95
+msgid "Testers and Tinkerers"
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:97
+msgid "Switch to devnet"
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:113
+msgid "This wallet address needs to have SOL and USDC token accounts initiated (0.1 SOL and 0.5 USDC)."
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:133
+msgid "Builders and Devs"
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:142
+msgid "Want to build something cool on top of solpay? Join our discord and say hi "
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:173
 msgid "Awaiting payment confirmation"
 msgstr ""
 
 #: templates/wc-solana-payment.php:2
-msgid "Pay now by scanning the QR code or by connecting your wallet and keep this page open until the transaction is confirmed."
+msgid "Pay now by scanning the QR code or by connecting your wallet."
+msgstr ""
+
+#: templates/wc-solana-payment.php:13
+#, php-format
+msgid "You have %s until QR code payment confirmation expires, after which you will have to refresh the page and try again."
 msgstr ""
 
 #: vendors/tgmpa/class-tgm-plugin-activation.php:334

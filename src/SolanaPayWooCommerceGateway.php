@@ -5,8 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
-{
+class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
     private const DEVNET_CLUSTER = 'devnet';
     private const MAINNET_CLUSTER = 'mainnet-beta';
     private const SOLPAY_STORE_CLUSTER = 'https://solpaystore.genesysgo.net/';
@@ -33,22 +32,21 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
     private const TRANSACTION_VERIFICATION_INTERVAL = 3000; // 3 seconds in  milliseconds
     private const TRANSACTION_VERIFICATION_TIMEOUT = 180000; // 3 minutes in milliseconds
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->id                 = 'solana_pay_gateway';
-        $this->icon               = apply_filters('wc_solana_icon_url', SP_WC_URI . '/assets/images/solpay-logo.svg?v=1' );
+        $this->icon               = apply_filters( 'wc_solana_icon_url', SP_WC_URI . '/assets/images/solpay-logo.svg?v=1' );
         $this->has_fields         = false;
-        $this->method_title       = __( 'Solana Payment', '' );
+        $this->method_title       = 'Solana Payment';
         $this->method_description = __(
             'Allows payments using SolanaPay SDK using USD Coin as a default SPL token. When in development mode, payments will be made in SOL ($1 = 1SOL)',
             'solana-pay-woocommerce-gateway'
         );
 
-        $this->enabled         = $this->get_option( 'enabled' );
-        $this->title           = $this->get_option( 'title' );
-        $this->description     = $this->get_option( 'description' );
-        $this->instructions    = $this->get_option( 'instructions', $this->description );
-        $this->merchant_wallet = $this->get_option( 'merchant_wallet' );
+        $this->enabled             = $this->get_option( 'enabled' );
+        $this->title               = 'Solana Payment Gateway';
+        $this->description         = __( 'Payment will be in USDC', 'solana-pay-woocommerce-gateway' );
+        $this->message_to_customer = $this->get_option( 'message_to_customer' );
+        $this->merchant_wallet     = $this->get_option( 'merchant_wallet' );
 
         $this->init_form_fields();
         $this->init_settings();
@@ -59,8 +57,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
         add_action( 'woocommerce_email_before_order_table', [ $this, 'email_instructions' ], 10, 3 );
     }
 
-    public function init_form_fields(): void
-    {
+    public function init_form_fields(): void {
         $this->form_fields = apply_filters( 'wc_solana_admin_fields', [
             'enabled'                  => [
                 'title'   => __( 'Enable/Disable', 'solana-pay-woocommerce-gateway' ),
@@ -68,59 +65,96 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
                 'label'   => __( 'Enable or disable Solana Payment Gateway', 'solana-pay-woocommerce-gateway' ),
                 'default' => 'no',
             ],
-            'title'                    => [
-                'title'       => __( 'Solana Payment Gateway', 'solana-pay-woocommerce-gateway' ),
-                'type'        => 'text',
-                'description' => __( 'Add a new title for Solana Payment Gateway. This is what users see in the checkout page',
-                                     'solana-pay-woocommerce-gateway' ),
-                'default'     => __( 'Solana Payment Gateway', 'solana-pay-woocommerce-gateway' ),
-                //'desc_tip'    => true,
-            ],
-            'description'              => [
-                'title'       => __( 'Solana Payment Gateway description', 'solana-pay-woocommerce-gateway' ),
+            'message_to_customer'      => [
+                'title'       => __( 'Message to customer', 'solana-pay-woocommerce-gateway' ),
                 'type'        => 'textarea',
-                'description' => __( 'Add a new description for Solana Payment Gateway. This is what users see in the checkout page',
+                'description' => __( 'This will be added to the the order email',
                                      'solana-pay-woocommerce-gateway' ),
-                'default'     => __( 'Solana Payment Gateway', 'solana-pay-woocommerce-gateway' ),
-                //'desc_tip'    => true,
+                'default'     => __( 'Thanks for paying with solpay!', 'solana-pay-woocommerce-gateway' ),
             ],
-            'instructions'             => [
-                'title'       => __( 'Instructions', 'solana-pay-woocommerce-gateway' ),
-                'type'        => 'textarea',
-                'description' => __( 'This will be added to the the order email.',
-                                     'solana-pay-woocommerce-gateway' ),
-                'default'     => __( 'Default instructions', 'solana-pay-woocommerce-gateway' ),
-                //'desc_tip'    => true,
-            ],
-            'devmode'                  => [
-                'title'       => __( 'Enable development mode', 'solana-pay-woocommerce-gateway' ),
-                'type'        => 'checkbox',
-                'description' => __( 'Transactions will take place on the Solana devnet.', 'solana-pay-woocommerce-gateway' ),
-                'default'     => 'yes',
-                //'desc_tip'    => true,
+            'merchant_wallet_info'     => [
+                'type' => 'merchant_wallet_info',
             ],
             'merchant_wallet'          => [
                 'title'       => __( 'Merchant Solana wallet', 'solana-pay-woocommerce-gateway' ),
                 'type'        => 'text',
-                'description' => __( 'Merchant Solana wallet. When in development mode use devnet wallet',
+                'description' => __( 'Payments will be done by default in USDC - if wallet token accounts are not open receiving tokens from other wallets might not work',
                                      'solana-pay-woocommerce-gateway' ),
                 'default'     => __( 'Merchant Solana wallet', 'solana-pay-woocommerce-gateway' ),
-                //'desc_tip'    => true,
             ],
             'verification_service_url' => [
                 'title'       => __( 'Verification service URL', 'solana-pay-woocommerce-gateway' ),
                 'type'        => 'text',
-                'description' => __( 'URL of the transaction verification service.', 'solana-pay-woocommerce-gateway' ),
+                'description' => __( 'URL of the transaction verification service', 'solana-pay-woocommerce-gateway' ),
                 'default'     => self::DEFAULT_VERIFICATION_SERVICE_URL,
-                //'desc_tip'    => true,
+            ],
+            'dev_info'                 => [
+                'type' => 'dev_info',
+            ],
+            'devmode'                  => [
+                'title'   => __( 'Testers and Tinkerers', 'solana-pay-woocommerce-gateway' ),
+                'type'    => 'checkbox',
+                'label'   => __( 'Switch to devnet', 'solana-pay-woocommerce-gateway' ),
+                'default' => 'no',
             ],
         ] );
     }
 
-    public function thank_you_page( $order_id ): void
-    {
+    public function generate_merchant_wallet_info_html( $key, $data ): string {
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc">
+            </th>
+            <td class="forminp">
+                <p>
+                    <?php
+                    echo wp_kses_post(
+                        __( 'This wallet address needs to have SOL and USDC token accounts initiated (0.1 SOL and 0.5 USDC).',
+                            'solana-pay-woocommerce-gateway' )
+                    );
+                    ?>
+                </p>
+            </td>
+        </tr>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    public function generate_dev_info_html( $key, $data ): string {
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc">
+                <label>
+                    <?php
+                    echo wp_kses_post(
+                        __( 'Builders and Devs', 'solana-pay-woocommerce-gateway' )
+                    );
+                    ?>
+                </label>
+            </th>
+            <td class="forminp">
+                <p>
+                    <?php
+                    echo wp_kses_post(
+                        __( 'Want to build something cool on top of solpay? Join our discord and say hi ',
+                            'solana-pay-woocommerce-gateway' )
+                    );
+                    ?>
+                    <a href="https://discord.gg/hczVjRjVBq" target="_blank">https://discord.gg/hczVjRjVBq</a>
+                </p>
+            </td>
+        </tr>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    public function thank_you_page( $order_id ): void {
         /** @var WC_Order $order */
-        $order = wc_get_order( $order_id );
+        $order               = wc_get_order( $order_id );
         $solanaPaymentConfig = $this->get_solana_payment_config( $order );
 
         ob_start();
@@ -134,8 +168,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
              );
     }
 
-    public function process_payment( $order_id ): array
-    {
+    public function process_payment( $order_id ): array {
         $order = wc_get_order( $order_id );
         $order->update_status( 'pending-payment', __( 'Awaiting payment confirmation', 'solana-pay-woocommerce-gateway' ) );
 
@@ -150,8 +183,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
     /**
      * @throws JsonException
      */
-    public function check_solana_payment(): void
-    {
+    public function check_solana_payment(): void {
         check_ajax_referer( 'check_solana_payment_nonce', 'security' );
 
         $errors = [];
@@ -174,12 +206,12 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
 
         $reference = sanitize_text_field( $_POST['reference'] );
         $recipient = sanitize_text_field( $_POST['recipient'] );
-        $splToken = !empty( $_POST['splToken'] ) ? sanitize_text_field( $_POST['splToken'] ) : '';
-        $amount = sanitize_text_field( $_POST['amount'] );
-        $label = sanitize_text_field( $_POST['label'] );
-        $message = sanitize_text_field( $_POST['message'] );
-        $memo = sanitize_text_field( $_POST['memo'] );
-        $cluster = sanitize_text_field( $_POST['cluster'] );
+        $splToken  = ! empty( $_POST['splToken'] ) ? sanitize_text_field( $_POST['splToken'] ) : '';
+        $amount    = sanitize_text_field( $_POST['amount'] );
+        $label     = sanitize_text_field( $_POST['label'] );
+        $message   = sanitize_text_field( $_POST['message'] );
+        $memo      = sanitize_text_field( $_POST['memo'] );
+        $cluster   = sanitize_text_field( $_POST['cluster'] );
 
         $orderWithReference = get_posts(
             [
@@ -232,6 +264,8 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
                 $transactionId = sanitize_text_field( $decodedBody['signature'] );
             }
 
+            $this->collectData( $transactionId, $order );
+
             $order->payment_complete( $transactionId );
 
             wp_send_json( [ 'redirectUrl' => $order->get_view_order_url() ] );
@@ -242,21 +276,19 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
         wp_send_json( $decodedBody );
     }
 
-    public function email_instructions( WC_Order $order, $sent_to_admin, $plain_text = false ): void
-    {
+    public function email_instructions( WC_Order $order, $sent_to_admin, $plain_text = false ): void {
         $emailInstructions = '';
 
         if ( ! $sent_to_admin && $this->id === $order->get_payment_method() ) {
-            if ( $this->instructions ) {
-                $emailInstructions .= wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
+            if ( $this->message_to_customer ) {
+                $emailInstructions .= wp_kses_post( wpautop( wptexturize( $this->message_to_customer ) ) . PHP_EOL );
             }
 
             echo apply_filters( 'wc_solana_payment_email', $emailInstructions, $order, $sent_to_admin );
         }
     }
 
-    private function get_solana_payment_config( WC_Order $order ): array
-    {
+    private function get_solana_payment_config( WC_Order $order ): array {
         if (
             ( $solanaReference = get_post_meta( $order->get_id(), self::SOLANA_REFERENCE_META_KEY, true ) )
             && ! empty( $solanaReference )
@@ -303,8 +335,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
     /**
      * Details: https://docs.solanapay.com/spec#reference
      */
-    private function get_solana_payment_reference(): string
-    {
+    private function get_solana_payment_reference(): string {
         $response = wp_remote_get( $this->get_option( 'verification_service_url' ) . '/reference' );
 
         if ( $response instanceof WP_Error ) {
@@ -323,32 +354,62 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway
     /**
      * Details: https://docs.solanapay.com/spec#amount
      */
-    private function get_solana_transaction_amount( WC_Order $order ): float
-    {
+    private function get_solana_transaction_amount( WC_Order $order ): float {
         return apply_filters( 'wc_solana_transaction_amount', $order->get_total(), $order );
     }
 
     /**
      * Details: https://docs.solanapay.com/spec#label
      */
-    private function get_solana_transaction_label( WC_Order $order ): string
-    {
+    private function get_solana_transaction_label( WC_Order $order ): string {
         return urlencode( apply_filters( 'wc_solana_transaction_label', get_bloginfo( 'name' ), $order ) );
     }
 
     /**
      * Details: https://docs.solanapay.com/spec#message
      */
-    private function get_solana_transaction_message( WC_Order $order ): string
-    {
+    private function get_solana_transaction_message( WC_Order $order ): string {
         return urlencode( apply_filters( 'wc_solana_transaction_message', '', $order ) );
     }
 
     /**
      * Details: https://docs.solanapay.com/spec#memo
      */
-    private function get_solana_transaction_memo( WC_Order $order ): string
-    {
+    private function get_solana_transaction_memo( WC_Order $order ): string {
         return urlencode( apply_filters( 'wc_solana_transaction_memo', '', $order ) );
+    }
+
+    private function collectData( string $transactionId, WC_Order $order ): void {
+        try {
+            $arguments = [
+                'blocking' => false,
+                'body'     => [
+                    'shop_name'      => get_bloginfo( 'name' ),
+                    'plugin'         => 'Solana Pay WooCommerce Payment Gateway',
+                    'transaction_id' => $transactionId,
+                    'order_data'     => json_encode(
+                        [
+                            'amount' => $order->get_total(),
+                            'items'  => array_map(
+                                static function (
+                                    WC_Order_Item $item
+                                ) {
+                                    return [
+                                        'product'  => $item->get_name(),
+                                        'quantity' => $item->get_quantity(),
+                                    ];
+                                },
+                                $order->get_items(),
+                                []
+                            )
+                        ],
+                        JSON_THROW_ON_ERROR
+                    )
+                ]
+            ];
+
+            wp_remote_post( $this->get_option( 'verification_service_url' ) . '/data', $arguments );
+        } catch ( Exception $e ) {
+        }
     }
 }
