@@ -9,6 +9,7 @@ import {useConnection, useWallet} from '@solana/wallet-adapter-react';
 import {getWalletAdapters} from "@solana/wallet-adapter-wallets";
 import {SolanaPaymentConfigType, SolanaPaymentWindow} from "./types";
 import {generateTransaction} from "./helpers/transaction-generator";
+import {tokenAuthFetchMiddleware} from "@strata-foundation/web3-token-auth";
 
 require('@solana/wallet-adapter-react-ui/styles.css');
 
@@ -31,8 +32,26 @@ const SolanaWalletPayment: FC = (config: SolanaPaymentConfigType) => {
         [network]
     );
 
+    const getToken = async (): Promise<string> => {
+        const res = await fetch(`${config.verificationServiceUrl}/auth`);
+
+        if (res.status === 200) {
+            const { access_token }: { access_token: string } = await res.json();
+            return access_token;
+        } else {
+            throw 'Authentication failed';
+        }
+    };
+
     return (
-        <ConnectionProvider endpoint={endpoint}>
+        <ConnectionProvider
+            endpoint={endpoint}
+            config={{
+                fetchMiddleware: tokenAuthFetchMiddleware({
+                    getToken,
+                })
+            }}
+        >
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
                     <WalletMultiButton/>
