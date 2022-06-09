@@ -1,8 +1,8 @@
 <h4>
     <?php _e( 'Pay now by scanning the QR code or by connecting your wallet.', 'solana-pay-woocommerce-gateway' ); ?>
 </h4>
-<div class='wc-solana-payment-root'>
-    <div class="wc-solana-payment-timer">
+<div class="wc-solana-payment-root">
+    <div class="wc-solana-payment-timer js-solana-timer-container">
         <?php
 
         $seconds    = $solanaPaymentConfig['verificationServiceTimeout'] / 1000;
@@ -21,6 +21,8 @@
 
         ?>
     </div>
-    <img src="" class='wc-solana-qr-container js-solana-qr-container' alt=""/>
+    <div class="wc-solana-final-confirmation js-final-confirmation-message"></div>
+    <img src="" class="wc-solana-qr-container js-solana-qr-container" alt=""/>
     <div class="wc-solana-wallet-container js-solana-wallet-container"></div>
+    <div class="wc-solana-error-container js-solana-error-container"></div>
 </div>

@@ -190,12 +190,12 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
 
         foreach ( [ 'reference', 'recipient', 'amount' ] as $param ) {
             if ( empty( $_POST[ $param ] ) ) {
-                $errors[ $param ] = "$param missing";
+                $errors[] = "$param missing";
             }
         }
 
         if ( ! empty( $_POST['cluster'] ) && ! in_array( $_POST['cluster'], self::CLUSTERS, true ) ) {
-            $errors['cluster'] = 'Invalid cluster';
+            $errors[] = 'Invalid cluster';
         }
 
         if ( ! empty( $errors ) ) {
@@ -224,7 +224,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
         );
 
         if ( empty( $orderWithReference ) ) {
-            wp_send_json( [ 'errors' => [ 'order' => "No order found for reference: {$reference}" ] ] );
+            wp_send_json( [ 'errors' => [ "No order found for reference: {$reference}" ] ] );
 
             return;
         }
@@ -249,7 +249,14 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
         );
 
         if ( $response instanceof WP_Error ) {
-            wp_send_json( [ 'errors' => [ 'request' => 'Verification request failed' ] ] );
+            wp_send_json(
+                [
+                    'errors' => [
+                        __( 'Transaction validation failed. Please refresh the page and try again.',
+                            'solana-pay-woocommerce-gateway' )
+                    ]
+                ]
+            );
 
             return;
         }
@@ -269,6 +276,12 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
             $order->payment_complete( $transactionId );
 
             wp_send_json( [ 'redirectUrl' => $order->get_view_order_url() ] );
+
+            return;
+        }
+
+        if ( array_key_exists( 'error', $decodedBody ) ) {
+            wp_send_json( [ 'errors' => [ $decodedBody['error'] ] ] );
 
             return;
         }
@@ -312,7 +325,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
 
         // TODO: Consider creating custom '/wc-api/solana-transaction-data' endpoint for fetching transaction data.
         return [
-            'transaction'                 => [
+            'transaction'                      => [
                 'reference' => $reference,
                 'recipient' => $merchantWallet,
                 'splToken'  => $splToken,
@@ -321,14 +334,46 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
                 'message'   => $message,
                 'memo'      => $memo,
             ],
-            'cluster'                     => $cluster,
-            'verificationServiceUrl'      => $verificationServiceUrl,
-            'verificationServiceInterval' => self::TRANSACTION_VERIFICATION_INTERVAL,
-            'verificationServiceTimeout'  => self::TRANSACTION_VERIFICATION_TIMEOUT,
-            'paymentNotificationEndpoint' => $paymentNotificationEndpoint,
-            'timeoutTimerSelector'        => '.js-solana-timeout-timer',
-            'qrCodeElementSelector'       => '.js-solana-qr-container',
-            'walletsElementSelector'      => '.js-solana-wallet-container',
+            'cluster'                          => $cluster,
+            'verificationServiceUrl'           => $verificationServiceUrl,
+            'verificationServiceInterval'      => self::TRANSACTION_VERIFICATION_INTERVAL,
+            'verificationServiceTimeout'       => self::TRANSACTION_VERIFICATION_TIMEOUT,
+            'paymentNotificationEndpoint'      => $paymentNotificationEndpoint,
+            'timerContainerSelector'           => '.js-solana-timer-container',
+            'timeoutTimerSelector'             => '.js-solana-timeout-timer',
+            'qrCodeElementSelector'            => '.js-solana-qr-container',
+            'walletsElementSelector'           => '.js-solana-wallet-container',
+            'finalConfirmationElementSelector' => '.js-final-confirmation-message',
+            'finalConfirmationMessage'         => __( 'Please wait for final confirmation...', 'solana-pay-woocommerce-gateway' ),
+            'errorContainerElementSelector'    => '.js-solana-error-container',
+            'errorMessagesMapping'             => [
+                [
+                    'error'         => 'payment_timeout',
+                    'formattedText' => __( 'The payment timer has run out. Please refresh the page and try again.',
+                                           'solana-pay-woocommerce-gateway' ),
+                ],
+                [
+                    'error'         => 'CreateTransactionError: payer not found',
+                    'formattedText' => sprintf(
+                        __( 'Please make sure your wallet has the required amount in %s tokens.',
+                            'solana-pay-woocommerce-gateway' ),
+                        $this->get_option( 'devmode' ) === 'yes' ? 'SOL' : 'USDC'
+                    ),
+                ],
+                [
+                    'error'         => 'CreateTransactionError: insufficient funds',
+                    'formattedText' => sprintf(
+                        __( 'Please make sure your wallet has the required amount in %s tokens.',
+                            'solana-pay-woocommerce-gateway' ),
+                        $this->get_option( 'devmode' ) === 'yes' ? 'SOL' : 'USDC'
+                    ),
+                ],
+                [
+                    'error'         => 'FindTransactionSignatureError: not found',
+                    'formattedText' => __( 'Transaction validation failed. Please refresh the page and try again.',
+                                           'solana-pay-woocommerce-gateway' )
+                ]
+            ],
         ];
     }
 

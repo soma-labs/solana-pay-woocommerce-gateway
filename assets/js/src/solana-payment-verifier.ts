@@ -16,12 +16,16 @@ export default class SolanaPaymentVerifier {
         this.timeoutTimer = new SolanaTimeoutTimer({
             timerSelector: this.config.timeoutTimerSelector,
             timeout: this.config.verificationServiceTimeout,
-            timeoutCallback: this.clearVerificationTimer.bind(this)
+            timeoutCallback: () => {
+                this.clearVerificationTimer();
+                window.SOLANA_ERROR_PRESENTER.clear().showError('payment_timeout');
+            }
         });
     }
 
     public verifyTransaction(): void {
-        this.startVerification()
+        this
+            .startVerification()
             .then(this.notifyStore.bind(this))
             .then(SolanaPaymentVerifier.handleStoreResponse)
             .catch(console.log);
@@ -38,6 +42,8 @@ export default class SolanaPaymentVerifier {
 
                     if (data.success) {
                         this.clearVerificationTimer();
+                        this.showFinalConfirmationMessage();
+
                         resolve(data);
                     }
                 } catch (e: any) {
@@ -77,7 +83,8 @@ export default class SolanaPaymentVerifier {
 
     private static handleStoreResponse(response: { errors?: any, redirectUrl? : string }): void {
         if (response.errors) {
-            console.log(response.errors);
+            window.SOLANA_ERROR_PRESENTER.clear().showErrors(response.errors);
+
             return;
         }
 
@@ -104,6 +111,34 @@ export default class SolanaPaymentVerifier {
         }
 
         return params;
+    }
+
+    private showFinalConfirmationMessage(): void {
+        let qrCodeElement = document.querySelector(this.config.qrCodeElementSelector) as HTMLElement;
+        let walletsElement = document.querySelector(this.config.walletsElementSelector) as HTMLElement;
+        let timerContainerElement = document.querySelector(this.config.timerContainerSelector) as HTMLElement;
+        let finalConfirmationMessageElement = document.querySelector(this.config.finalConfirmationElementSelector) as HTMLElement;
+
+        if (qrCodeElement) {
+            qrCodeElement.classList.add('wc-solana-qr-container--hidden');
+            qrCodeElement.style.display = 'none';
+        }
+
+        if (walletsElement) {
+            walletsElement.classList.add('wc-solana-wallet-container--hidden');
+            walletsElement.style.display = 'none';
+        }
+
+        if (timerContainerElement) {
+            timerContainerElement.classList.add('wc-solana-payment-timer--hidden');
+            timerContainerElement.style.display = 'none';
+        }
+
+        if (finalConfirmationMessageElement) {
+            finalConfirmationMessageElement.classList.add('wc-solana-final-confirmation--displayed');
+            finalConfirmationMessageElement.style.display = 'block';
+            finalConfirmationMessageElement.innerHTML = this.config.finalConfirmationMessage;
+        }
     }
 
     public static init(config: SolanaPaymentConfigType): SolanaPaymentVerifier {

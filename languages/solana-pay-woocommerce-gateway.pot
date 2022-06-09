@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-06 13:07+0300\n"
+"POT-Creation-Date: 2022-06-09 15:30+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -98,6 +98,25 @@ msgstr ""
 
 #: src/SolanaPayWooCommerceGateway.php:173
 msgid "Awaiting payment confirmation"
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:255
+#: src/SolanaPayWooCommerceGateway.php:373
+msgid "Transaction validation failed. Please refresh the page and try again."
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:347
+msgid "Please wait for final confirmation..."
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:352
+msgid "The payment timer has run out. Please refresh the page and try again."
+msgstr ""
+
+#: src/SolanaPayWooCommerceGateway.php:358
+#: src/SolanaPayWooCommerceGateway.php:366
+#, php-format
+msgid "Please make sure your wallet has the required amount in %s tokens."
 msgstr ""
 
 #: templates/wc-solana-payment.php:2
