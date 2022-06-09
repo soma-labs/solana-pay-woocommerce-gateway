@@ -353,7 +353,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
                                            'solana-pay-woocommerce-gateway' ),
                 ],
                 [
-                    'error'         => 'CreateTransactionError: payer not found',
+                    'error'         => 'payer not found',
                     'formattedText' => sprintf(
                         __( 'Please make sure your wallet has the required amount in %s tokens.',
                             'solana-pay-woocommerce-gateway' ),
@@ -361,7 +361,7 @@ class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
                     ),
                 ],
                 [
-                    'error'         => 'CreateTransactionError: insufficient funds',
+                    'error'         => 'insufficient funds',
                     'formattedText' => sprintf(
                         __( 'Please make sure your wallet has the required amount in %s tokens.',
                             'solana-pay-woocommerce-gateway' ),

@@ -78,7 +78,9 @@ const PaymentButton: FC = (props: { transaction: any }) => {
                     window.SOLANA_PAYMENT_VERIFIER.verifyTransaction();
                 }
             } catch (e) {
-                window.SOLANA_ERROR_PRESENTER.showError(e.toString());
+                if (e instanceof Error) {
+                    window.SOLANA_ERROR_PRESENTER.showError(e.message);
+                }
             }
         },
         [publicKey, sendTransaction, connection]
