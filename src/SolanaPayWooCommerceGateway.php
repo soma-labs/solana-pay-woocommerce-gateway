@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class SolanaPayWooCommerceGateway extends WC_Payment_Gateway {
     private const DEVNET_CLUSTER = 'devnet';
     private const MAINNET_CLUSTER = 'mainnet-beta';
-    private const SOLPAY_STORE_CLUSTER = 'https://solpaystore.genesysgo.net/';
+    private const SOLPAY_STORE_CLUSTER = 'https://solana-api.projectserum.com'; // 'https://solpaystore.genesysgo.net/';
     private const CLUSTERS = [
         self::DEVNET_CLUSTER,
         self::MAINNET_CLUSTER,
