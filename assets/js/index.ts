@@ -1,10 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import {createElement} from 'react';
 import SolanaQrCodePayment from "./src/solana-qr-code-payment";
 import SolanaWalletPayment from "./src/solana-wallet-payment";
 import {SolanaPaymentWindow} from "./src/types";
 import SolanaPaymentVerifier from "./src/solana-payment-verifier";
 import SolanaErrorPresenter from "./src/solana-error-presenter";
+import {createRoot} from "react-dom/client";
 
 declare const window: SolanaPaymentWindow;
 
@@ -17,13 +17,14 @@ window.addEventListener('load', () => {
     SolanaQrCodePayment.init(config);
 
     const domContainer = document.querySelector(config.walletsElementSelector);
-    domContainer && ReactDOM.render(
-        React.createElement(
+    const root = createRoot(domContainer);
+
+    root.render(
+        createElement(
             SolanaWalletPayment,
             {
                 ...config
             }
-        ),
-        domContainer
+        )
     );
 });

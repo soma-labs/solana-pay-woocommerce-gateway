@@ -3,6 +3,7 @@
         "target": "es6",
         "module": "ESNext",
         "moduleResolution": "node",
+        "esModuleInterop": true,
         "noResolve": false,
         "noImplicitAny": false,
         "sourceMap": true,

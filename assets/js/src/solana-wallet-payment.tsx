@@ -1,12 +1,19 @@
-import React, {FC, useMemo, useCallback} from 'react';
+import React, {useMemo, useCallback} from 'react';
 import {ConnectionProvider, WalletProvider} from '@solana/wallet-adapter-react';
 import {WalletAdapterNetwork} from '@solana/wallet-adapter-base';
 import {WalletModalProvider, WalletMultiButton} from '@solana/wallet-adapter-react-ui';
 import {clusterApiUrl} from '@solana/web3.js';
-import {createTransaction} from '@solana/pay';
+import {createTransfer} from '@solana/pay';
 import {WalletNotConnectedError} from '@solana/wallet-adapter-base';
 import {useConnection, useWallet} from '@solana/wallet-adapter-react';
-import {getWalletAdapters} from "@solana/wallet-adapter-wallets";
+import {
+    BackpackWalletAdapter,
+    PhantomWalletAdapter,
+    SolflareWalletAdapter,
+    SolletExtensionWalletAdapter,
+    SolletWalletAdapter,
+    TorusWalletAdapter
+} from "@solana/wallet-adapter-wallets";
 import {SolanaPaymentConfigType, SolanaPaymentWindow} from "./types";
 import {generateTransaction} from "./helpers/transaction-generator";
 
@@ -14,7 +21,7 @@ require('@solana/wallet-adapter-react-ui/styles.css');
 
 declare const window: SolanaPaymentWindow;
 
-const SolanaWalletPayment: FC = (config: SolanaPaymentConfigType) => {
+const SolanaWalletPayment = (config: SolanaPaymentConfigType) => {
     let network;
     let endpoint;
 
@@ -27,7 +34,14 @@ const SolanaWalletPayment: FC = (config: SolanaPaymentConfigType) => {
     }
 
     const wallets = useMemo(
-        () => getWalletAdapters({network: network}),
+        () => [
+            new PhantomWalletAdapter(),
+            new BackpackWalletAdapter(),
+            new SolflareWalletAdapter(),
+            new SolletWalletAdapter({ network }),
+            new SolletExtensionWalletAdapter({ network }),
+            new TorusWalletAdapter(),
+        ],
         [network]
     );
 
@@ -43,7 +57,7 @@ const SolanaWalletPayment: FC = (config: SolanaPaymentConfigType) => {
     );
 };
 
-const PaymentButton: FC = (props: { transaction: any }) => {
+const PaymentButton = (props: { transaction: any }) => {
     const transaction = props.transaction;
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
@@ -58,12 +72,12 @@ const PaymentButton: FC = (props: { transaction: any }) => {
 
                 let transactionData = await generateTransaction(transaction);
 
-                const tx = await createTransaction(
+                const tx = await createTransfer(
                     connection,
                     publicKey,
-                    transactionData.recipient,
-                    transactionData.amount,
                     {
+                        recipient: transactionData.recipient,
+                        amount: transactionData.amount,
                         reference: transactionData.reference,
                         splToken: transactionData.splToken,
                         memo: transactionData.memo,
